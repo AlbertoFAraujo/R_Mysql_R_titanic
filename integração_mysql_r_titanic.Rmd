@@ -1,0 +1,192 @@
+---
+title: "Integração MySQL com R - Titanic"
+author: "Alberto Araujo"
+date: "2024-04-08"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+install.packages('RmySQL')
+install.packages('ggplot2')
+install.packages('dbplyr')
+
+library(RMySQL)
+library(ggplot2)
+library(dplyr, warn.conflicts = FALSE)
+```
+
+```{r}
+# Conectando no banco Mysql
+help(dbConnect)
+conexao = RMySQL::dbConnect(RMySQL::MySQL(),
+                            user = 'root',
+                            password = 'mysql24',
+                            dbname = 'titanicdb',
+                            host = 'localhost')
+```
+
+------------------------------------------------------------------------
+
+### Explorando os dados
+
+O dataset do titanic é muito popular......
+
+**Sumário das variáveis:**
+
+-   pclass = Tipo de classe de passagem (Do 1 ao 3), sendo 1 a melhor classe e 3 a pior classe.
+
+-   survived = Se sobreviveu ao naufrágio estará como 1 e caso esteja com 0 (zero) não sobreviveu.
+
+-   name = Nome do passageiro
+
+-   sex = Gênero do passageiro, sendo masculino e feminino.
+
+-   age = Idade do passageiro na data da ocorrência do naufrágio.
+
+-   sibsp = Número de irmãos / cônjuges a bordo.
+
+-   parch = Número de pais / filhos a bordo.
+
+-   ticket = Código do ticket.
+
+-   fare = Valor da passagem.
+
+-   cabin = Código de identificação da Cabine.
+
+-   embarked = Local ondem o passageiro embarcou no navio.
+
+------------------------------------------------------------------------
+
+1.  Qual o percentual de sobreviventes? E de não sobreviventes?
+
+```{r warning=FALSE}
+query1 <- 
+"
+SELECT 
+	survived,
+	COUNT(*) AS 'Total',
+    COUNT(*)/SUM(COUNT(*))OVER()AS 'Percentual'
+FROM titanicdb.titanic
+WHERE pclass <> ''
+GROUP BY survived;
+"
+# Enviar consulta ao banco de dados
+resultado_query1 <- RMySQL::dbSendQuery(conexao, query1)
+
+# Buscar resultados na consulta
+resultado1 <- RMySQL::dbFetch(resultado_query1)
+
+# Visualizar o resultado da consulta
+resultado1
+```
+
+Nota-se que o número de sobreviventes foi equivalente a 61,87% do total (1306) e de não sobreviventes foi de 38,13%.
+
+------------------------------------------------------------------------
+
+2.  Qual o percentual de sobreviventes por gênero? E de não sobreviventes?
+
+resultado2
+
+```{r warning=FALSE}
+query2 <- 
+"
+SELECT
+	survived, 
+    sex,
+    COUNT(*) AS 'Total',
+    COUNT(*)/SUM(COUNT(*))OVER(partition by survived)AS 'Percentual'
+FROM titanicdb.titanic
+WHERE survived <> ''
+GROUP BY survived, sex
+ORDER BY Total DESC
+"
+# Enviar consulta ao banco de dados
+resultado_query2 <- RMySQL::dbSendQuery(conexao, query2)
+
+# Buscar resultados na consulta
+resultado2 <- RMySQL::dbFetch(resultado_query2)
+
+# Visualizar o resultado da consulta
+resultado2
+```
+
+Para os sobreviventes:
+
+-   84,41% são do gênero masculino e 15,59% são do gênero feminino
+
+Para os não sobreviventes:
+
+-   67,87% são do gênero masculino e 32,13% são do gênero feminino.
+
+------------------------------------------------------------------------
+
+3.  Qual faixa de idade apresentou maior percentual de sobrevivência?
+
+```{r warning=FALSE}
+# Query
+query3 <- "SELECT
+          	DISTINCT(Age)
+          FROM titanicdb.titanic
+          ORDER BY Age DESC"
+
+# Enviar consulta ao banco de dados
+resultado_query3 <- RMySQL::dbSendQuery(conexao, query3)
+
+# Buscar resultados na consulta
+resultado3 <- RMySQL::dbFetch(resultado_query3)
+
+# Visualizar o resultado da consulta
+plot(resultado3)
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+# Fechar o resultado na consulta
+RMySQL::dbClearResult(resultado_query3)
+```
+
+```{r}
+# Fechar a conexão com o banco
+#RMySQL::dbDisconnect(conexao)
+```
+
+```{r}
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
